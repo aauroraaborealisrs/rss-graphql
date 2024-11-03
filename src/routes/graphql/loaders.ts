@@ -1,106 +1,51 @@
-
-import { PrismaClient, User } from '@prisma/client';
 import DataLoader from 'dataloader';
 
-interface IPost {
-  id: string;
-  title: string;
-  content: string;
-  authorId: string;
-}
-
-const createUserLoader = (prisma: PrismaClient) => {
-  return new DataLoader(async (userIds: readonly string[]) => {
+export const createUserLoader = (prisma) => {
+  return new DataLoader(async (userIds) => {
     const users = await prisma.user.findMany({
-      where: {
-        id: { in: userIds as string[] },
-      },
+      where: { id: { in: userIds } },
       include: {
         userSubscribedTo: true,
         subscribedToUser: true,
       },
     });
-
-    const usersMap = new Map(users.map((user) => [user.id, user]));
-    return userIds.map((userId) => usersMap.get(userId) || null);
+    const usersLookup = users.reduce((map, user) => map.set(user.id, user), new Map());
+    return userIds.map((userId) => usersLookup.get(userId) || null);
   });
 };
 
-const createMemberTypeLoader = (prisma: PrismaClient) => {
-  return new DataLoader(async (memberTypesIds: readonly string[]) => {
-    const users = await prisma.memberType.findMany({
-      where: {
-        id: { in: memberTypesIds as string[] },
-      },
+export const createMemberLoader = (prisma) => {
+  return new DataLoader(async (memberTypeIds) => {
+    const memberTypes = await prisma.memberType.findMany({
+      where: { id: { in: memberTypeIds } },
     });
-
-    const memberTypesMap = new Map(
-      users.map((memberType) => [memberType.id, memberType]),
-    );
-    return memberTypesIds.map(
-      (usermemberTypeId) => memberTypesMap.get(usermemberTypeId) || null,
-    );
+    const memberTypeLookup = memberTypes.reduce((map, type) => map.set(type.id, type), new Map());
+    return memberTypeIds.map((id) => memberTypeLookup.get(id) || null);
   });
 };
 
-const createPostLoader = (prisma: PrismaClient) => {
-  return new DataLoader(async (authorsIds: readonly string[]) => {
+export const createPostLoader = (prisma) => {
+  return new DataLoader(async (authorIds) => {
     const posts = await prisma.post.findMany({
-      where: {
-        authorId: { in: authorsIds as string[] },
-      },
+      where: { authorId: { in: authorIds } },
     });
 
-    const postsMap = new Map<string, IPost[]>();
-    posts.forEach((post) => {
-      if (!postsMap.has(post.authorId)) {
-        postsMap.set(post.authorId, []);
-      }
-      const authorPosts = postsMap.get(post.authorId);
-      authorPosts && authorPosts.push(post);
-    });
+    const postsByAuthor = posts.reduce((map, post) => {
+      if (!map.has(post.authorId)) map.set(post.authorId, []);
+      map.get(post.authorId).push(post);
+      return map;
+    }, new Map());
 
-    return authorsIds.map((authorId) => postsMap.get(authorId) || []);
+    return authorIds.map((authorId) => postsByAuthor.get(authorId) || []);
   });
 };
 
-const createProfileLoader = (prisma: PrismaClient) => {
-  return new DataLoader(async (ids: readonly string[]) => {
+export const createProfileLoader = (prisma) => {
+  return new DataLoader(async (userIds) => {
     const profiles = await prisma.profile.findMany({
-      where: {
-        userId: { in: ids as string[] },
-      },
+      where: { userId: { in: userIds } },
     });
-
-    const profilesMap = new Map(profiles.map((profile) => [profile.userId, profile]));
-    return ids.map((id) => profilesMap.get(id));
+    const profilesLookup = profiles.reduce((map, profile) => map.set(profile.userId, profile), new Map());
+    return userIds.map((userId) => profilesLookup.get(userId) || null);
   });
 };
-
-const createSubscriptionsByUserIdLoader = (prisma: PrismaClient) => {
-    return new DataLoader<string, User[]>(async (userIds: readonly string[]) => {
-      const subscriptions = await prisma.subscribersOnAuthors.findMany({
-        where: { subscriberId: { in: userIds as string[] } },
-        include: { author: true },
-      });
-  
-      const subscriptionsMap = new Map<string, User[]>();
-  
-      subscriptions.forEach((sub) => {
-        const userSubscriptions = subscriptionsMap.get(sub.subscriberId) || [];
-        userSubscriptions.push(sub.author);
-        subscriptionsMap.set(sub.subscriberId, userSubscriptions);
-      });
-  
-      return userIds.map((id) => subscriptionsMap.get(id) || []);
-    });
-  };
-
-export {
-  createUserLoader,
-  createMemberTypeLoader,
-  createPostLoader,
-  createProfileLoader,
-  createSubscriptionsByUserIdLoader
-};
-
