@@ -12,14 +12,14 @@ export const users = {
 
     const include: IsubsFields = {};
     if (fields && fields.hasOwnProperty('userSubscribedTo')) {
-        include.userSubscribedTo = true;
-      }
-      if (fields && fields.hasOwnProperty('subscribedToUser')) {
-        include.subscribedToUser = true;
-      }
+      include.userSubscribedTo = true;
+    }
+    if (fields && fields.hasOwnProperty('subscribedToUser')) {
+      include.subscribedToUser = true;
+    }
 
     const users = await context.prisma.user.findMany({ include });
-    users.forEach(user => context.userLoader.prime(user.id, user));
+    users.forEach((user) => context.userLoader.prime(user.id, user));
     return users;
   },
 };

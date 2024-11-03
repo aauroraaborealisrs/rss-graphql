@@ -8,7 +8,7 @@ export const posts = {
   type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(Post))),
   resolve: async (_obj: any, _args: any, context: IContext) => {
     const posts = await context.prisma.post.findMany();
-    posts.forEach(post => context.postLoader.prime(post.id, post));
+    posts.forEach((post) => context.postLoader.prime(post.id, post));
     return posts;
   },
 };

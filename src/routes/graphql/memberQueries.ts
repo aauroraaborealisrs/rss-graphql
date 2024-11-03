@@ -7,7 +7,9 @@ export const memberTypes = {
   type: new GraphQLList(MemberType),
   resolve: async (_obj: any, _args: any, context: IContext) => {
     const memberTypes = await context.prisma.memberType.findMany();
-    memberTypes.forEach(memberType => context.memberTypeLoader.prime(memberType.id, memberType));
+    memberTypes.forEach((memberType) =>
+      context.memberTypeLoader.prime(memberType.id, memberType),
+    );
     return memberTypes;
   },
 };

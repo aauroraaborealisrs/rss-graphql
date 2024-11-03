@@ -6,10 +6,12 @@ import { UUIDType } from './types/uuid.js';
 export const createUser: GraphQLFieldConfig<any, any> = {
   type: new GraphQLNonNull(User),
   args: { dto: { type: new GraphQLNonNull(CreateUserInput) } },
-  resolve: (_, args, { prisma }) => 
-    prisma.user.create({
-      data: { name: args.dto.name, balance: args.dto.balance },
-    }).then(user => user),
+  resolve: (_, args, { prisma }) =>
+    prisma.user
+      .create({
+        data: { name: args.dto.name, balance: args.dto.balance },
+      })
+      .then((user) => user),
 };
 
 export const changeUser: GraphQLFieldConfig<any, any> = {
@@ -21,10 +23,12 @@ export const changeUser: GraphQLFieldConfig<any, any> = {
   resolve: (_, args, context: IContext) => {
     context.userLoader.clear(args.id);
 
-    return context.prisma.user.update({
-      where: { id: args.id },
-      data: args.dto,
-    }).then(user => user);
+    return context.prisma.user
+      .update({
+        where: { id: args.id },
+        data: args.dto,
+      })
+      .then((user) => user);
   },
 };
 
@@ -34,8 +38,10 @@ export const deleteUser = {
   resolve: (_, args, context: IContext) => {
     context.userLoader.clear(args.id);
 
-    return context.prisma.user.delete({
-      where: { id: args.id },
-    }).then(() => null);
+    return context.prisma.user
+      .delete({
+        where: { id: args.id },
+      })
+      .then(() => null);
   },
 };

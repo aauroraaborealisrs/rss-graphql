@@ -8,7 +8,7 @@ export const profiles = {
   type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(Profile))),
   resolve: async (_obj: any, _args: any, context: IContext) => {
     const profiles = await context.prisma.profile.findMany();
-    profiles.forEach(profile => context.profileLoader.prime(profile.id, profile));
+    profiles.forEach((profile) => context.profileLoader.prime(profile.id, profile));
     return profiles;
   },
 };

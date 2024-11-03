@@ -10,12 +10,14 @@ export const subscribeTo = {
   },
   resolve: (_, args, context: IContext) => {
     context.userLoader.clear(args.userId);
-    return context.prisma.subscribersOnAuthors.create({
-      data: {
-        subscriberId: args.userId,
-        authorId: args.authorId,
-      },
-    }).then(() => 'Subscribed successfully');
+    return context.prisma.subscribersOnAuthors
+      .create({
+        data: {
+          subscriberId: args.userId,
+          authorId: args.authorId,
+        },
+      })
+      .then(() => 'Subscribed successfully');
   },
 };
 
@@ -27,13 +29,15 @@ export const unsubscribeFrom = {
   },
   resolve: (_, args, context: IContext) => {
     context.userLoader.clear(args.userId);
-    return context.prisma.subscribersOnAuthors.delete({
-      where: {
-        subscriberId_authorId: {
-          subscriberId: args.userId,
-          authorId: args.authorId,
+    return context.prisma.subscribersOnAuthors
+      .delete({
+        where: {
+          subscriberId_authorId: {
+            subscriberId: args.userId,
+            authorId: args.authorId,
+          },
         },
-      },
-    }).then(() => 'Unsubscribed successfully');
+      })
+      .then(() => 'Unsubscribed successfully');
   },
 };
