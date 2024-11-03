@@ -9,7 +9,7 @@ import {
     GraphQLObjectType,
     GraphQLString,
   } from 'graphql';
-  import { UUIDType } from './uuid.js';
+import { UUIDType } from './uuid.js';
 import { MemberTypeId } from '../../member-types/schemas.js';
 ;
   
@@ -63,7 +63,6 @@ import { MemberTypeId } from '../../member-types/schemas.js';
       balance: { type: GraphQLFloat },
     },
   });
-  
   
   
 export const Post = new GraphQLObjectType({
